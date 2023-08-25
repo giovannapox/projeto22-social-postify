@@ -1,21 +1,30 @@
-import { Controller, Get, Post, Body, Param, Delete, Put } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Put, HttpException, HttpStatus } from '@nestjs/common';
 import { MediasService } from './medias.service';
 import { CreateMediaDto } from './dto/create-media.dto';
 import { UpdateMediaDto } from './dto/update-media.dto';
+
 
 @Controller('medias')
 export class MediasController {
   constructor(private readonly mediasService: MediasService) {}
 
   @Post()
-  create(@Body() createMediaDto: CreateMediaDto) {
-    return this.mediasService.create(createMediaDto);
-  }
+  async create(@Body() body: CreateMediaDto) {
+    try { 
+      return await this.mediasService.create(body);
+    } catch (err) {
+      throw new HttpException(err.message, HttpStatus.CONFLICT);
+    };
+  };
 
   @Get()
-  findAll() {
-    return this.mediasService.findAll();
-  }
+  async findAll() {
+    try { 
+      return await this.mediasService.findAll();
+    } catch (err) {
+      throw new HttpException(err.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    };
+  };
 
   @Get(':id')
   findOne(@Param('id') id: string) {

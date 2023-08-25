@@ -1,16 +1,27 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateMediaDto } from './dto/create-media.dto';
 import { UpdateMediaDto } from './dto/update-media.dto';
+import { MediasRepository } from './medias.repository';
 
 @Injectable()
 export class MediasService {
-  create(createMediaDto: CreateMediaDto) {
-    return 'This action adds a new media';
-  }
+  
+  constructor(private readonly repository: MediasRepository){};
 
-  findAll() {
-    return `This action returns all medias`;
-  }
+  async create(body: CreateMediaDto) {
+    const mediaExists = await this.repository.findMediaAlreadyExists(body);
+    if(mediaExists) throw new ConflictException('This title and this username already exist!');
+    return await this.repository.createMedia(body);
+  };
+
+  async findAll() {
+    const medias = await this.repository.findMedias();
+    return medias.map((media) => ({
+      id: media.id,
+      title: media.title,
+      username: `https://www.${media.title.toLowerCase()}.com/${media.username}`,
+    }));
+  };
 
   findOne(id: number) {
     return `This action returns a #${id} media`;

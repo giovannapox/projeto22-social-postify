@@ -1,4 +1,4 @@
-import { ConflictException, HttpStatus, Injectable } from '@nestjs/common';
+import { ConflictException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateMediaDto } from './dto/create-media.dto';
 import { UpdateMediaDto } from './dto/update-media.dto';
 import { MediasRepository } from './medias.repository';
@@ -19,19 +19,37 @@ export class MediasService {
     return medias.map((media) => ({
       id: media.id,
       title: media.title,
-      username: `https://www.${media.title.toLowerCase()}.com/${media.username}`,
+      username: `https://www.${media.title.toLowerCase()}.com/${media.username}`
     }));
   };
 
-  findOne(id: number) {
-    return `This action returns a #${id} media`;
+  async findOne(id: number) {
+    const media = await this.repository.findMediaById(id);
+    if(!media) throw new NotFoundException("Id not found!");
+
+    const data = [{
+      id: media.id,
+      title: media.title,
+      username: `https://www.${media.title.toLowerCase()}.com/${media.username}`
+    }];
+
+    return data;
+  };
+
+  async update(id: number, body: UpdateMediaDto) {
+    const media = await this.repository.findMediaById(id);
+    if(!media) throw new NotFoundException("Id not found!");
+
+    const mediaExists = await this.repository.findMediaAlreadyExists(body);
+    if(mediaExists) throw new ConflictException('This title and this username already exist!');
+
+    return await this.repository.updateMedia(id, body);
   }
 
-  update(id: number, updateMediaDto: UpdateMediaDto) {
-    return `This action updates a #${id} media`;
-  }
+  async remove(id: number) {
+    const media = await this.repository.findMediaById(id);
+    if(!media) throw new NotFoundException("Id not found!");
 
-  remove(id: number) {
-    return `This action removes a #${id} media`;
+    return await this.repository.deleteMedia(id);
   }
 }

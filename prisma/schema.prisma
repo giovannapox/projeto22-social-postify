@@ -23,7 +23,7 @@ model Posts {
   id Int @id @default(autoincrement())
   title String 
   text String
-  image String? @default("")
+  image String? 
   publications Publications[] 
 
   @@map("posts")

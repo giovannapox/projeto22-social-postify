@@ -13,7 +13,11 @@ export class MediasController {
     try { 
       return await this.mediasService.create(body);
     } catch (err) {
-      throw new HttpException(err.message, HttpStatus.CONFLICT);
+      if(err instanceof ConflictException){
+        throw new HttpException(err.message, HttpStatus.CONFLICT);
+      } else {
+        throw new HttpException(err.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      };
     };
   };
 
@@ -31,17 +35,39 @@ export class MediasController {
     try { 
       return await this.mediasService.findOne(Number(id));
     } catch (err) {
-      throw new HttpException(err.message, HttpStatus.NOT_FOUND);
+      if(err instanceof NotFoundException){
+        throw new HttpException(err.message, HttpStatus.NOT_FOUND);
+      } else {
+        throw new HttpException(err.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      };
     };
   };
 
   @Put(':id')
   async update(@Param('id') id: string, @Body() body: UpdateMediaDto) {
-    return await this.mediasService.update(Number(id), body);
+    try { 
+      return await this.mediasService.update(Number(id), body);
+    } catch (err) {
+      if(err instanceof NotFoundException){
+        throw new HttpException(err.message, HttpStatus.NOT_FOUND);
+      } else if (err instanceof ConflictException) {
+        throw new HttpException(err.message, HttpStatus.CONFLICT);
+      } else {
+        throw new HttpException(err.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      };
+    };
   };
 
   @Delete(':id')
   async remove(@Param('id') id: string) {
-    return await this.mediasService.remove(Number(id));
+    try { 
+      return await this.mediasService.remove(Number(id));
+    } catch (err) {
+      if(err instanceof NotFoundException){
+        throw new HttpException(err.message, HttpStatus.NOT_FOUND);
+      } else {
+        throw new HttpException(err.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      };
+    };
   };
 };

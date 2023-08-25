@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Delete, Put } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Put, HttpException, HttpStatus, NotFoundException } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
@@ -8,27 +8,59 @@ export class PostsController {
   constructor(private readonly postsService: PostsService) {}
 
   @Post()
-  create(@Body() createPostDto: CreatePostDto) {
-    return this.postsService.create(createPostDto);
-  }
+  async create(@Body() body: CreatePostDto) {
+    try { 
+      return await this.postsService.create(body);
+    } catch (err) {
+      throw new HttpException(err.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    };
+  };
 
   @Get()
-  findAll() {
-    return this.postsService.findAll();
-  }
+  async findAll() {
+    try { 
+      return await this.postsService.findAll();
+    } catch (err) {
+      throw new HttpException(err.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    };
+  };
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.postsService.findOne(+id);
-  }
+  async findOne(@Param('id') id: string) {
+    try { 
+      return await this.postsService.findOne(Number(id));
+    } catch (err) {
+      if(err instanceof NotFoundException){
+        throw new HttpException(err.message, HttpStatus.NOT_FOUND);
+      } else {
+        throw new HttpException(err.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      };
+    };
+  };
 
   @Put(':id')
-  update(@Param('id') id: string, @Body() updatePostDto: UpdatePostDto) {
-    return this.postsService.update(+id, updatePostDto);
-  }
+  async update(@Param('id') id: string, @Body() body: UpdatePostDto) {
+    try { 
+      return await this.postsService.update(Number(id), body);
+    } catch (err) {
+      if(err instanceof NotFoundException){
+        throw new HttpException(err.message, HttpStatus.NOT_FOUND);
+      } else {
+        throw new HttpException(err.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      };
+    };
+  };
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.postsService.remove(+id);
-  }
-}
+  async remove(@Param('id') id: string) {
+    try { 
+      return await this.postsService.remove(Number(id));
+    } catch (err) {
+      if(err instanceof NotFoundException){
+        throw new HttpException(err.message, HttpStatus.NOT_FOUND);
+      } else {
+        throw new HttpException(err.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      };
+    };
+  };
+};

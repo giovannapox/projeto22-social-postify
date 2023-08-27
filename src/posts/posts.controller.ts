@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Delete, Put, HttpException, HttpStatus, NotFoundException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Put, HttpException, HttpStatus, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
@@ -58,6 +58,8 @@ export class PostsController {
     } catch (err) {
       if(err instanceof NotFoundException){
         throw new HttpException(err.message, HttpStatus.NOT_FOUND);
+      } else if (err instanceof ForbiddenException) {
+        throw new HttpException(err.message, HttpStatus.FORBIDDEN);
       } else {
         throw new HttpException(err.message, HttpStatus.INTERNAL_SERVER_ERROR);
       };

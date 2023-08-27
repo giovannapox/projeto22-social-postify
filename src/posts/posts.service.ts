@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { PostsRepository } from './posts.repository';
@@ -15,38 +15,24 @@ export class PostsService {
   async findAll() {
     const posts = await this.repository.findAllPosts();
 
-    const data = posts.map((post) => ({
-      id: post.id,
-      title: post.title,
-      text: post.text,
-      image: post.image
-    }));
-
-    for (let i = 0; i < data.length; i++) {
-      if (data[i].image === null) {
-        delete data[i].image;
+    for (let i = 0; i < posts.length; i++) {
+      if (posts[i].image === null) {
+        delete posts[i].image;
       };
     };
 
-    return data;
+    return posts;
   };
 
   async findOne(id: number) {
     const post = await this.repository.findPostById(id);
     if(!post) throw new NotFoundException();
-
-    const data = {
-      id: post.id,
-      title: post.title,
-      text: post.text,
-      image: post.image
-    }
     
-    if(data.image === null){
-      delete data.image;
+    if(post.image === null){
+      delete post.image;
     };
 
-    return data;
+    return post;
   };
 
   async update(id: number, body: UpdatePostDto) {
@@ -59,6 +45,9 @@ export class PostsService {
   async remove(id: number) {
     const post = await this.repository.findPostById(id);
     if(!post) throw new NotFoundException();
+
+    const publication = await this.repository.findPublicationsById(id);
+    if(publication) throw new ForbiddenException();
 
     return await this.repository.deletePost(id);
   };

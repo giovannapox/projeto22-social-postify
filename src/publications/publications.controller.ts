@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Delete, Put } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Put, HttpException, HttpStatus, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { PublicationsService } from './publications.service';
 import { CreatePublicationDto } from './dto/create-publication.dto';
 import { UpdatePublicationDto } from './dto/update-publication.dto';
@@ -8,27 +8,65 @@ export class PublicationsController {
   constructor(private readonly publicationsService: PublicationsService) {}
 
   @Post()
-  create(@Body() createPublicationDto: CreatePublicationDto) {
-    return this.publicationsService.create(createPublicationDto);
-  }
+  async create(@Body() body: CreatePublicationDto) {
+    try { 
+      return await this.publicationsService.create(body);
+    } catch (err) {
+      if(err instanceof NotFoundException){
+        throw new HttpException(err.message, HttpStatus.NOT_FOUND);
+      } else {
+        throw new HttpException(err.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      };
+    };
+  };
 
   @Get()
-  findAll() {
-    return this.publicationsService.findAll();
-  }
+  async findAll() {
+    try { 
+      return await this.publicationsService.findAll();
+    } catch (err) {
+      throw new HttpException(err.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    };
+  };
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.publicationsService.findOne(+id);
-  }
+  async findOne(@Param('id') id: string) {
+    try { 
+      return await this.publicationsService.findOne(Number(id));
+    } catch (err) {
+      if(err instanceof NotFoundException){
+        throw new HttpException(err.message, HttpStatus.NOT_FOUND);
+      } else {
+        throw new HttpException(err.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      };
+    };
+  };
 
   @Put(':id')
-  update(@Param('id') id: string, @Body() updatePublicationDto: UpdatePublicationDto) {
-    return this.publicationsService.update(+id, updatePublicationDto);
-  }
+  async update(@Param('id') id: string, @Body() body: UpdatePublicationDto) {
+    try { 
+      return await this.publicationsService.update(Number(id), body);
+    } catch (err) {
+      if(err instanceof NotFoundException){
+        throw new HttpException(err.message, HttpStatus.NOT_FOUND);
+      } else if (err instanceof ForbiddenException) {
+        throw new HttpException(err.message, HttpStatus.FORBIDDEN);
+      } else {
+        throw new HttpException(err.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      };
+    };
+  };
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.publicationsService.remove(+id);
-  }
+  async remove(@Param('id') id: string) {
+    try { 
+      return await this.publicationsService.remove(Number(id));
+    } catch (err) {
+      if(err instanceof NotFoundException){
+        throw new HttpException(err.message, HttpStatus.NOT_FOUND);
+      } else {
+        throw new HttpException(err.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      };
+    };
+  };
 }

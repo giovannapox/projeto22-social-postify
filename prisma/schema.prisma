@@ -35,7 +35,7 @@ model Publications {
   media Medias @relation(fields: [mediaId], references: [id])
   postId Int
   post Posts @relation(fields: [postId], references: [id])
-  date DateTime @default(now())
+  date DateTime 
 
   @@map("publications")
 }

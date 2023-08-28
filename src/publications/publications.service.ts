@@ -15,9 +15,22 @@ export class PublicationsService {
     return await this.repository.createPublication(body);
   };
 
-  async findAll() {
-    return await this.repository.findPublications();
-  };
+  async findAll(isPublished: string, after: string) {
+    let publications = await this.repository.findPublications();
+    const dateNow = new Date();
+    
+    if (isPublished === 'true' || isPublished === 'false') {
+      const isPublishedTF = isPublished === 'true';
+      publications = publications.filter((e) =>
+        isPublishedTF ? new Date(e.date) < dateNow : new Date(e.date) > dateNow
+      );
+    }
+    
+    if (after) {
+      publications = publications.filter((e) => new Date(e.date) > new Date(after));
+    }
+    return publications;
+  }
 
   async findOne(id: number) {
     const publicationExists = await this.repository.findPublicationById(id);

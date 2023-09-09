@@ -1,3 +1,4 @@
+import { faker } from '@faker-js/faker';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 let prisma: PrismaService;
@@ -9,8 +10,8 @@ export function initializeFactoryPrisma(prismaService: PrismaService) {
 export function createMedias() {
     return prisma.medias.create({
         data: {
-            title: "Instagram",
-            username: "giovannapox"
+            title: faker.lorem.word(),
+            username: faker.internet.userName()
         }
     });
 };
@@ -19,19 +20,19 @@ export function createMedias() {
 export function createPosts(){
     return prisma.posts.create({
         data: {
-            title: "Instagram",
-            text: "TOO EZ for tuyz",
-            image: "https://pbs.twimg.com/media/F4V2lQPXIAA2kEt?format=png&name=360x360"
+            title: faker.lorem.sentence(),
+            text: faker.lorem.text(),
+            image: faker.image.url()
         }
     });
 };
 
-export function createPublications(mediaId: number, postId: number){
+export function createPublications(mediaId: number, postId: number, IsPublished: boolean){
     return prisma.publications.create({
         data: {
             mediaId,
             postId,
-            date:"2024-04-16T14:37:10.352Z"
+            date:(IsPublished ? "2020-11-30T11:34:32.352Z" : "2024-06-11T13:25:17.352Z")
         }
     });
 };
